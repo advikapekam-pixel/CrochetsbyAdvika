@@ -1,13 +1,12 @@
 import {
-  createUserWithEmailAndPassword, linkWithPhoneNumber, RecaptchaVerifier,
-  sendEmailVerification, signInWithEmailAndPassword, signOut,
+  createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut,
 } from 'firebase/auth';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { emailAdvikaNewSignup } from './notifyAdvika';
 
 /**
- * Create an email/password account and its customer profile (phone not yet verified).
+ * Create an email/password account and its customer profile, and email a verify link.
  *
  * >>> await signUpCustomer({ name: 'Riya Shah', email: 'riya@example.com', password: 'secret12', phone: '+919812345678' })
  * User { uid: 'kX9a…', email: 'riya@example.com' }
@@ -33,28 +32,12 @@ export function logOutCustomer() {
 }
 
 /**
- * Text a 6-digit code to the phone, to be linked to the logged-in account.
- * Linking (not signing in) keeps one account per customer — the old site's
- * signInWithPhoneNumber created a second, phone-only account.
- * `containerId` is an empty div the invisible reCAPTCHA renders into.
+ * Re-send Firebase's free "verify your email" link to the logged-in customer.
  *
- * >>> const pending = await sendPhoneCode('+919812345678', 'recaptcha-container')
+ * >>> await resendVerificationEmail()
  */
-export async function sendPhoneCode(phone, containerId) {
-  const verifier = new RecaptchaVerifier(auth, containerId, { size: 'invisible' });
-  try { return await linkWithPhoneNumber(auth.currentUser, phone, verifier); }
-  finally { verifier.clear(); }
-}
-
-/**
- * Check the SMS code; on success the phone is linked and marked verified on the profile.
- *
- * >>> await confirmPhoneCode(pending, '123456')
- */
-export async function confirmPhoneCode(pending, code) {
-  const { user } = await pending.confirm(code);
-  await user.getIdToken(true); // refresh so Firestore rules see the newly linked phone
-  await updateDoc(doc(db, 'users', user.uid), { phone: user.phoneNumber, phoneVerified: true });
+export function resendVerificationEmail() {
+  return sendEmailVerification(auth.currentUser);
 }
 
 /**

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAccount } from '../account/AccountContext';
-import PhoneVerifyStep from '../components/PhoneVerifyStep';
 import { useShop } from '../shop/ShopContext';
 import { formatDate, formatPrice } from '../shop/format';
 import { cleanIndianPhone, isValidIndianPhone } from '../shop/indianPhone';
 import { whatsappAdvikaLink } from '../shop/whatsapp';
-import { logOutCustomer, updateCustomerProfile } from '../services/customerAccount';
+import { logOutCustomer, resendVerificationEmail, updateCustomerProfile } from '../services/customerAccount';
 import { listCustomerOrders, shortOrderId } from '../services/orders';
 
 const ROW = { display: 'flex', justifyContent: 'space-between', padding: '11px 0', borderBottom: '1px solid var(--border)', fontSize: 13.5 };
@@ -41,7 +40,7 @@ function OrderHistoryCard({ order: o }) {
 }
 
 /**
- * Logged-in customer's profile (view / edit / verify phone) and order history.
+ * Logged-in customer's profile (view / edit / verify email) and order history.
  *
  * >>> <Route path="/account" element={<AccountPage />} />
  */
@@ -51,10 +50,11 @@ export default function AccountPage() {
   const { showToast } = useShop();
   const [orders, setOrders] = useState(null); // null = loading, 'error' = failed
   const [editing, setEditing] = useState(false);
-  const [verifying, setVerifying] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (user) user.reload().then(() => setEmailVerified(user.emailVerified)).catch(() => {}); // picks up a link clicked in another tab
     if (user) listCustomerOrders(user.uid).then(setOrders).catch(err => { console.error(err); setOrders('error'); });
   }, [user]);
 
@@ -62,6 +62,9 @@ export default function AccountPage() {
   if (!user) return <Navigate to="/login" replace />;
 
   const p = profile || {};
+  const resendLink = () => resendVerificationEmail()
+    .then(() => showToast('Verification link sent — check your inbox ✦'))
+    .catch(() => showToast('Could not send the link — please try again later.'));
   const logOut = async () => { await logOutCustomer(); showToast('Logged out ✦'); navigate('/'); };
 
   const saveProfile = async e => {
@@ -103,12 +106,10 @@ export default function AccountPage() {
           ) : (
             <>
               <div style={ROW}><span>Name</span><b>{p.name || '—'}</b></div>
-              <div style={ROW}><span>Email</span><b>{user.email || '—'}</b></div>
+              <div style={ROW}><span>Email</span><b>{user.email || '—'}{emailVerified && <span className="admin-badge-verified" style={{ marginLeft: 6 }}>✓ Verified</span>}</b></div>
               <div style={ROW}><span>Phone</span><b>{p.phone || '—'}{p.phoneVerified && <span className="admin-badge-verified" style={{ marginLeft: 6 }}>✓ Verified</span>}</b></div>
               <div style={{ ...ROW, borderBottom: 'none' }}><span>Member since</span><b>{formatDate(p.createdAt)}</b></div>
-              {p.phone && !p.phoneVerified && (verifying
-                ? <PhoneVerifyStep phone={p.phone} onDone={() => setVerifying(false)} onSkip={() => setVerifying(false)} />
-                : <button className="btn btn-sage btn-sm btn-block" style={{ marginTop: 10 }} onClick={() => setVerifying(true)}>Verify Phone</button>)}
+              {!emailVerified && <button className="btn btn-sage btn-sm btn-block" style={{ marginTop: 10 }} onClick={resendLink}>Resend Email Verification Link</button>}
               <button className="btn btn-outline btn-sm btn-block" style={{ marginTop: 18 }} onClick={() => setEditing(true)}>Edit Profile</button>
               <button className="btn btn-outline btn-sm btn-block" style={{ marginTop: 10 }} onClick={logOut}>Logout</button>
             </>
