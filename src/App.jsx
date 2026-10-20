@@ -6,11 +6,11 @@ import PageStub from './pages/PageStub';
 import HomePage from './pages/HomePage';
 import GalleryPage from './pages/GalleryPage';
 import ProductPage from './pages/ProductPage';
+import WishlistPage from './pages/WishlistPage';
+import CartPage from './pages/CartPage';
 
 // ── Pages still to port; each stub is swapped for its real page step by step ──
 const STUB_ROUTES = [
-  { path: '/wishlist', title: 'Wishlist' },
-  { path: '/cart', title: 'Cart' },
   { path: '/track', title: 'Track Order' },
   { path: '/custom-order', title: 'Custom Order' },
   { path: '/login', title: 'Login' },
@@ -37,6 +37,8 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/cart" element={<CartPage />} />
           {STUB_ROUTES.map(r => <Route key={r.path} path={r.path} element={<PageStub title={r.title} />} />)}
           <Route path="*" element={<PageStub title="Page not found" />} />
         </Routes>

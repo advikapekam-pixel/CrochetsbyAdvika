@@ -19,9 +19,9 @@ The React port must match its behavior unless a decision below says otherwise.
 | # | Step | Status |
 |---|------|--------|
 | 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Done |
-| 2 | Catalog data + Home (incl. testimonials, FAQ) + Gallery + Product pages; shared cart/wishlist/toast state | Done (branch feature/catalog-pages) |
-| 3 | Wishlist page + Cart page (coupons, gift note) | Next |
-| 4 | Firebase/EmailJS services from .env | — |
+| 2 | Catalog data + Home (incl. testimonials, FAQ) + Gallery + Product pages; shared cart/wishlist/toast state | Done |
+| 3 | Wishlist page + Cart page (coupons, gift note) | Done (branch feature/cart-wishlist) |
+| 4 | Firebase/EmailJS services from .env | Next |
 | 5 | Checkout + Custom Order + WhatsApp handoff | — |
 | 6 | Auth (login/signup/phone verify) + Account | — |
 | 7 | Track Order | — |
@@ -42,6 +42,8 @@ The React port must match its behavior unless a decision below says otherwise.
 | Gallery category filter | In URL (`/gallery?cat=hats`) so collection links work | Decided |
 | Wishlist persistence | In memory only, same as old site | Provisional |
 | Hint/share links | Point to `/product/<id>` (old site linked to `#product`) | Decided |
+| FREESHIP coupon | Fixed: old site subtracted ₹60 twice (₹350 item cost ₹290) | Decided |
+| "Proceed to Details" | Shows "coming soon" until checkout (step 5) | Provisional |
 
 ## 5. Run
 Double-click `start.bat`.
