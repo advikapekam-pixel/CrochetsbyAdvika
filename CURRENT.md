@@ -27,7 +27,7 @@ The React port must match its behavior unless a decision below says otherwise.
 | 7 | Track Order | Done |
 | 8 | Admin dashboard + Excel export | Done |
 | 9 | About, Policies, 404 page | Done |
-| 10 | Security fixes (firestore.rules, server-checked totals); XSS + phone-auth bug already fixed by the port | Next |
+| 10 | Security rules (`firestore.rules`): role lock, honest phoneVerified, order validation, tracking tied to real orders | Done — needs deploy |
 | 11 | WhatsApp OTP (Meta Cloud API + Cloudflare Worker) replacing SMS | Waiting on Meta account |
 
 ## 4. Decisions
@@ -46,7 +46,8 @@ The React port must match its behavior unless a decision below says otherwise.
 | FREESHIP coupon | Fixed: old site subtracted ₹60 twice (₹350 item cost ₹290) | Decided |
 | "Proceed to Details" | Shows "coming soon" until checkout (step 5) | Provisional |
 | Firebase SDK style | Modular v10 imports (old site used compat CDN scripts) | Decided |
-| Deployed Firestore rules | Live rules denied a public tracking read that local `firestore.rules` allows — live rules may differ; check in step 7 | Open |
+| Deployed Firestore rules | New `firestore.rules` written; owner deploys with `npx firebase-tools deploy --only firestore:rules` | Open (deploy) |
+| Order price check | Rules check totals add up and discount ≤ 10% + ₹60; per-item prices are not checked (needs a server; Advika confirms on WhatsApp) | Provisional |
 | Phone verification | SMS at signup (and "Verify Phone" on Account), linked to the same account; checkout autofills and marks verified if it matches | Decided |
 
 ## 5. Run

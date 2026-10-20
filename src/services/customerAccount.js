@@ -53,6 +53,7 @@ export async function sendPhoneCode(phone, containerId) {
  */
 export async function confirmPhoneCode(pending, code) {
   const { user } = await pending.confirm(code);
+  await user.getIdToken(true); // refresh so Firestore rules see the newly linked phone
   await updateDoc(doc(db, 'users', user.uid), { phone: user.phoneNumber, phoneVerified: true });
 }
 
