@@ -3,21 +3,10 @@ import { useAccount } from '../account/AccountContext';
 import { useShop } from '../shop/ShopContext';
 import { formatDate, formatPrice } from '../shop/format';
 import { whatsappAdvikaLink } from '../shop/whatsapp';
+import { trackingStep } from '../shop/orderStatus';
 import { findOrderToTrack, shortOrderId } from '../services/orders';
 
 const STEPS = ['Order Received', 'In Progress', 'Dispatched'];
-
-/**
- * Timeline step (1–3) for an order status; old statuses map onto the 3 steps.
- *
- * >>> trackingStep('packed')
- * 3
- */
-function trackingStep(status) {
-  if (['shipped', 'delivered', 'packed'].includes(status)) return 3;
-  if (['in progress', 'yarn'].includes(status)) return 2;
-  return 1;
-}
 
 /** Order card with the 3-step progress timeline. */
 function TrackingResult({ order }) {

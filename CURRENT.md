@@ -25,8 +25,8 @@ The React port must match its behavior unless a decision below says otherwise.
 | 5 | Checkout + Custom Order + WhatsApp handoff | Done |
 | 6 | Auth (login/signup/phone verify) + Account | Done |
 | 7 | Track Order | Done |
-| 8 | Admin dashboard + Excel export | Next |
-| 9 | About, Policies | — |
+| 8 | Admin dashboard + Excel export | Done |
+| 9 | About, Policies | Next |
 | 10 | Security fixes (firestore.rules, XSS, phone-auth bug) | — |
 
 ## 4. Decisions
