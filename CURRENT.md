@@ -26,8 +26,9 @@ The React port must match its behavior unless a decision below says otherwise.
 | 6 | Auth (login/signup/phone verify) + Account | Done |
 | 7 | Track Order | Done |
 | 8 | Admin dashboard + Excel export | Done |
-| 9 | About, Policies | Next |
-| 10 | Security fixes (firestore.rules, XSS, phone-auth bug) | — |
+| 9 | About, Policies, 404 page | Done |
+| 10 | Security fixes (firestore.rules, server-checked totals); XSS + phone-auth bug already fixed by the port | Next |
+| 11 | WhatsApp OTP (Meta Cloud API + Cloudflare Worker) replacing SMS | Waiting on Meta account |
 
 ## 4. Decisions
 | Question | Decision | Status |

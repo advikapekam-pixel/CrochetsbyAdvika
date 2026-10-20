@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import SiteHeader from './components/SiteHeader';
 import SiteFooter from './components/SiteFooter';
-import PageStub from './pages/PageStub';
+import NotFoundPage from './pages/NotFoundPage';
 import HomePage from './pages/HomePage';
 import GalleryPage from './pages/GalleryPage';
 import ProductPage from './pages/ProductPage';
@@ -13,12 +13,8 @@ import LoginPage from './pages/LoginPage';
 import TrackOrderPage from './pages/TrackOrderPage';
 import AdminPage from './pages/AdminPage';
 import AccountPage from './pages/AccountPage';
-
-// ── Pages still to port; each stub is swapped for its real page step by step ──
-const STUB_ROUTES = [
-  { path: '/about', title: 'About' },
-  { path: '/policies/:tab?', title: 'Policies' },
-];
+import AboutPage from './pages/AboutPage';
+import PoliciesPage from './pages/PoliciesPage';
 
 /**
  * App layout: header, the current page, footer. Scrolls to top on page change.
@@ -44,8 +40,9 @@ export default function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/account" element={<AccountPage />} />
-          {STUB_ROUTES.map(r => <Route key={r.path} path={r.path} element={<PageStub title={r.title} />} />)}
-          <Route path="*" element={<PageStub title="Page not found" />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/policies/:tab?" element={<PoliciesPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
       <SiteFooter />

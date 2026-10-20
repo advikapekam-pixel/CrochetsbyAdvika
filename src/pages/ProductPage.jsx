@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import PageStub from './PageStub';
+import NotFoundPage from './NotFoundPage';
 import { PRODUCTS } from '../data/catalog';
 import { useShop } from '../shop/ShopContext';
 import { discountPercent, formatPrice, tagClassName } from '../shop/format';
@@ -72,7 +72,7 @@ export default function ProductPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  if (!p) return <PageStub title="Product not found" />;
+  if (!p) return <NotFoundPage title="Product not found" />;
 
   const wished = wishlist.has(p.id);
   const discount = discountPercent(p);
