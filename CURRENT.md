@@ -38,7 +38,7 @@ The React port must match its behavior unless a decision below says otherwise.
 | Run locally | `start.bat` → http://localhost:5173 | Decided |
 | URL style for pages | Clean paths via react-router (`/gallery`); `firebase.json` rewrites all to index.html | Decided |
 | Styling | Old site CSS reused as-is in `src/index.css` | Decided |
-| Git remote / PRs | No remote yet; work on feature branches locally | Open |
+| Git remote / PRs | GitHub advikapekam-pixel/CrochetsbyAdvika; push to `test`, owner opens PR test → main | Decided |
 | Gallery category filter | In URL (`/gallery?cat=hats`) so collection links work | Decided |
 | Wishlist persistence | In memory only, same as old site | Provisional |
 | Hint/share links | Point to `/product/<id>` (old site linked to `#product`) | Decided |
