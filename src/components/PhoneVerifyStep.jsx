@@ -12,6 +12,7 @@ const PHONE_ERRORS = {
   'auth/code-expired': 'That code expired — please send a new one.',
   'auth/too-many-requests': 'Too many attempts. Please try again after a few minutes.',
   'auth/quota-exceeded': 'Daily SMS limit reached. Please try again tomorrow.',
+  'auth/billing-not-enabled': 'SMS verification is not available right now. You can skip this step — Advika will confirm your number on WhatsApp.',
   'auth/operation-not-allowed': 'Phone sign-in is not enabled in Firebase Console (Authentication → Sign-in method → Phone).',
   'auth/unauthorized-domain': 'This domain is not authorized in Firebase Console (Authentication → Settings → Authorized domains).',
 };
