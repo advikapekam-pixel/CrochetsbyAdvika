@@ -20,9 +20,9 @@ The React port must match its behavior unless a decision below says otherwise.
 |---|------|--------|
 | 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Done |
 | 2 | Catalog data + Home (incl. testimonials, FAQ) + Gallery + Product pages; shared cart/wishlist/toast state | Done |
-| 3 | Wishlist page + Cart page (coupons, gift note) | Done (branch feature/cart-wishlist) |
-| 4 | Firebase/EmailJS services from .env | Next |
-| 5 | Checkout + Custom Order + WhatsApp handoff | — |
+| 3 | Wishlist page + Cart page (coupons, gift note) | Done |
+| 4 | Firebase/EmailJS services from .env (`src/services/`) | Done (branch feature/services) |
+| 5 | Checkout + Custom Order + WhatsApp handoff | Next |
 | 6 | Auth (login/signup/phone verify) + Account | — |
 | 7 | Track Order | — |
 | 8 | Admin dashboard + Excel export | — |
@@ -44,6 +44,8 @@ The React port must match its behavior unless a decision below says otherwise.
 | Hint/share links | Point to `/product/<id>` (old site linked to `#product`) | Decided |
 | FREESHIP coupon | Fixed: old site subtracted ₹60 twice (₹350 item cost ₹290) | Decided |
 | "Proceed to Details" | Shows "coming soon" until checkout (step 5) | Provisional |
+| Firebase SDK style | Modular v10 imports (old site used compat CDN scripts) | Decided |
+| Deployed Firestore rules | Live rules denied a public tracking read that local `firestore.rules` allows — live rules may differ; check in step 7 | Open |
 
 ## 5. Run
 Double-click `start.bat`.
