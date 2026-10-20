@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import CheckoutForm from '../components/CheckoutForm';
 import { useShop } from '../shop/ShopContext';
 import { findCoupon, priceCart } from '../shop/cartPricing';
 import { formatPrice } from '../shop/format';
@@ -18,7 +19,18 @@ export default function CartPage() {
   const [isGift, setIsGift] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
 
-  const { lines, subtotal, shipping, discount, total } = priceCart(cart, coupon);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const checkoutRef = useRef(null);
+
+  const pricing = priceCart(cart, coupon);
+  const { lines, subtotal, shipping, discount, total } = pricing;
+
+  // ── Checkout ──
+  const openCheckout = () => {
+    setShowCheckout(true);
+    setTimeout(() => checkoutRef.current?.scrollIntoView({ behavior: 'smooth' }));
+  };
+  const resetExtras = () => { setCoupon(null); setCouponInput(''); setIsGift(false); setGiftMessage(''); };
 
   // ── Cart line edits ──
   const changeQty = (id, delta) => setCart(c => {
@@ -113,9 +125,15 @@ export default function CartPage() {
               <div style={{ background: 'var(--cream)', padding: '10px 14px', borderRadius: 'var(--radius-sm)', fontSize: 12, color: 'var(--charcoal-soft)', marginTop: 16 }}>
                 ✦ Pay with UPI QR code after confirming customization &amp; timeline with Advika.
               </div>
-              {/* Checkout details form arrives in step 5 */}
-              <button className="btn btn-rose btn-block" style={{ marginTop: 18 }} onClick={() => showToast('Checkout is coming soon ✦')}>Proceed to Details →</button>
+              <button className="btn btn-rose btn-block" style={{ marginTop: 18 }} onClick={openCheckout}>Proceed to Details →</button>
             </div>
+          </div>
+        )}
+
+        {/* Outside the cart branch so the success popup survives the cart emptying */}
+        {showCheckout && (
+          <div ref={checkoutRef}>
+            <CheckoutForm pricing={pricing} coupon={coupon} giftMessage={isGift ? giftMessage.trim() : ''} onPlaced={resetExtras} />
           </div>
         )}
       </div>

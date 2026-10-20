@@ -21,9 +21,9 @@ The React port must match its behavior unless a decision below says otherwise.
 | 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Done |
 | 2 | Catalog data + Home (incl. testimonials, FAQ) + Gallery + Product pages; shared cart/wishlist/toast state | Done |
 | 3 | Wishlist page + Cart page (coupons, gift note) | Done |
-| 4 | Firebase/EmailJS services from .env (`src/services/`) | Done (branch feature/services) |
-| 5 | Checkout + Custom Order + WhatsApp handoff | Next |
-| 6 | Auth (login/signup/phone verify) + Account | — |
+| 4 | Firebase/EmailJS services from .env (`src/services/`) | Done |
+| 5 | Checkout + Custom Order + WhatsApp handoff | Done |
+| 6 | Auth (login/signup/phone verify) + Account | Next |
 | 7 | Track Order | — |
 | 8 | Admin dashboard + Excel export | — |
 | 9 | About, Policies | — |
@@ -46,6 +46,7 @@ The React port must match its behavior unless a decision below says otherwise.
 | "Proceed to Details" | Shows "coming soon" until checkout (step 5) | Provisional |
 | Firebase SDK style | Modular v10 imports (old site used compat CDN scripts) | Decided |
 | Deployed Firestore rules | Live rules denied a public tracking read that local `firestore.rules` allows — live rules may differ; check in step 7 | Open |
+| SMS phone check at checkout / custom order | Left out for now (phone format check only); revisit with login in step 6 | Provisional |
 
 ## 5. Run
 Double-click `start.bat`.
