@@ -24,8 +24,8 @@ The React port must match its behavior unless a decision below says otherwise.
 | 4 | Firebase/EmailJS services from .env (`src/services/`) | Done |
 | 5 | Checkout + Custom Order + WhatsApp handoff | Done |
 | 6 | Auth (login/signup/phone verify) + Account | Done |
-| 7 | Track Order | Next |
-| 8 | Admin dashboard + Excel export | — |
+| 7 | Track Order | Done |
+| 8 | Admin dashboard + Excel export | Next |
 | 9 | About, Policies | — |
 | 10 | Security fixes (firestore.rules, XSS, phone-auth bug) | — |
 
