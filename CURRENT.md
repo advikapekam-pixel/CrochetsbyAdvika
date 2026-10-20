@@ -23,8 +23,8 @@ The React port must match its behavior unless a decision below says otherwise.
 | 3 | Wishlist page + Cart page (coupons, gift note) | Done |
 | 4 | Firebase/EmailJS services from .env (`src/services/`) | Done |
 | 5 | Checkout + Custom Order + WhatsApp handoff | Done |
-| 6 | Auth (login/signup/phone verify) + Account | Next |
-| 7 | Track Order | — |
+| 6 | Auth (login/signup/phone verify) + Account | Done |
+| 7 | Track Order | Next |
 | 8 | Admin dashboard + Excel export | — |
 | 9 | About, Policies | — |
 | 10 | Security fixes (firestore.rules, XSS, phone-auth bug) | — |
@@ -46,7 +46,7 @@ The React port must match its behavior unless a decision below says otherwise.
 | "Proceed to Details" | Shows "coming soon" until checkout (step 5) | Provisional |
 | Firebase SDK style | Modular v10 imports (old site used compat CDN scripts) | Decided |
 | Deployed Firestore rules | Live rules denied a public tracking read that local `firestore.rules` allows — live rules may differ; check in step 7 | Open |
-| SMS phone check at checkout / custom order | Left out for now (phone format check only); revisit with login in step 6 | Provisional |
+| Phone verification | SMS at signup (and "Verify Phone" on Account), linked to the same account; checkout autofills and marks verified if it matches | Decided |
 
 ## 5. Run
 Double-click `start.bat`.

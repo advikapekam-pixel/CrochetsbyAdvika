@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useShop } from '../shop/ShopContext';
+import { useAccount } from '../account/AccountContext';
 import { formatPrice } from '../shop/format';
 import { cleanIndianPhone, isValidIndianPhone } from '../shop/indianPhone';
 import { whatsappAdvikaLink } from '../shop/whatsapp';
@@ -30,6 +31,7 @@ function cartOrderMessage(orderNumber, o) {
 export default function CheckoutForm({ pricing, coupon, giftMessage, onPlaced }) {
   const navigate = useNavigate();
   const { setCart, showToast } = useShop();
+  const { user, profile } = useAccount();
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(null); // { orderNumber, order }
 
@@ -46,7 +48,7 @@ export default function CheckoutForm({ pricing, coupon, giftMessage, onPlaced })
       type: 'cart',
       name: form.name,
       phone: '+91' + cleanIndianPhone(form.phone),
-      phoneVerified: false, // SMS check returns in step 6
+      phoneVerified: Boolean(profile?.phoneVerified && profile.phone === '+91' + cleanIndianPhone(form.phone)),
       email: form.email,
       address: form.address,
       city: form.city,
@@ -65,7 +67,7 @@ export default function CheckoutForm({ pricing, coupon, giftMessage, onPlaced })
 
     setPlacing(true);
     try {
-      const orderId = await placeOrder(order);
+      const orderId = await placeOrder(order, user?.uid);
       setPlaced({ orderNumber: shortOrderId(orderId), order });
       e.target.reset();
       setCart({});
@@ -89,12 +91,12 @@ export default function CheckoutForm({ pricing, coupon, giftMessage, onPlaced })
             <span>No payment is charged online now. After placing your order, Advika will connect with you on WhatsApp to confirm pieces, custom colors, and share her UPI QR code for payment.</span>
           </div>
 
-          <form onSubmit={submit}>
+          <form onSubmit={submit} key={user?.uid || 'guest'}>
             <div className="row-2">
-              <div className="field"><label htmlFor="ckName">Full Name *</label><input id="ckName" name="name" type="text" required placeholder="Advika Pekam" /></div>
-              <div className="field"><label htmlFor="ckPhone">Mobile Number (WhatsApp) *</label><input id="ckPhone" name="phone" type="tel" required placeholder="10-digit mobile number" maxLength={10} inputMode="numeric" /></div>
+              <div className="field"><label htmlFor="ckName">Full Name *</label><input id="ckName" name="name" type="text" defaultValue={profile?.name} required placeholder="Advika Pekam" /></div>
+              <div className="field"><label htmlFor="ckPhone">Mobile Number (WhatsApp) *</label><input id="ckPhone" name="phone" type="tel" defaultValue={cleanIndianPhone(profile?.phone)} required placeholder="10-digit mobile number" maxLength={10} inputMode="numeric" /></div>
             </div>
-            <div className="field"><label htmlFor="ckEmail">Email Address (for order receipts)</label><input id="ckEmail" name="email" type="email" placeholder="you@email.com" /></div>
+            <div className="field"><label htmlFor="ckEmail">Email Address (for order receipts)</label><input id="ckEmail" name="email" type="email" defaultValue={user?.email} placeholder="you@email.com" /></div>
             <div className="field"><label htmlFor="ckAddress">Complete Delivery Address *</label><textarea id="ckAddress" name="address" required placeholder="Flat/House number, building name, street, locality, landmark" /></div>
             <div className="row-2">
               <div className="field"><label htmlFor="ckCity">City *</label><input id="ckCity" name="city" type="text" required placeholder="Mumbai" /></div>

@@ -9,6 +9,17 @@ export function formatPrice(amount) {
 }
 
 /**
+ * Firestore timestamp as a short Indian date, or '—'.
+ *
+ * >>> formatDate(Timestamp.fromDate(new Date('2026-10-20')))
+ * '20 Oct 2026'
+ */
+export function formatDate(timestamp) {
+  if (!timestamp?.toDate) return '—';
+  return timestamp.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/**
  * CSS class for a product tag pill.
  *
  * >>> tagClassName('NEW')

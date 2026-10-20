@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useShop } from '../shop/ShopContext';
+import { useAccount } from '../account/AccountContext';
 import { cleanIndianPhone, isValidIndianPhone } from '../shop/indianPhone';
 import { whatsappAdvikaLink } from '../shop/whatsapp';
 import { placeOrder, shortOrderId } from '../services/orders';
@@ -27,6 +28,7 @@ const BUDGETS = [
  */
 export default function CustomOrderPage() {
   const { showToast } = useShop();
+  const { user, profile } = useAccount();
   const [palette, setPalette] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -40,7 +42,7 @@ export default function CustomOrderPage() {
       type: 'custom',
       name: form.name,
       phone: '+91' + cleanIndianPhone(form.phone),
-      phoneVerified: false, // SMS check returns in step 6
+      phoneVerified: Boolean(profile?.phoneVerified && profile.phone === '+91' + cleanIndianPhone(form.phone)),
       email: form.email,
       budget: form.budget,
       idea: form.idea,
@@ -52,7 +54,7 @@ export default function CustomOrderPage() {
     const waTab = window.open('', '_blank');
     setSending(true);
     try {
-      const orderNumber = shortOrderId(await placeOrder(order));
+      const orderNumber = shortOrderId(await placeOrder(order, user?.uid));
       setSent(true);
       showToast('Custom idea sent! Let\'s chat on WhatsApp ✦');
       const text = `Hi Advika! 🧶 I've submitted a Custom Crochet Request (#${orderNumber}):\n• Name: ${order.name}\n• Budget: ${order.budget}\n• Palette: ${palette || 'Custom choice'}\n• Idea: ${order.idea}\n\nI'd like to discuss the design, timeline, and share reference photos! ✨`;
@@ -75,12 +77,12 @@ export default function CustomOrderPage() {
           <p className="sub">Have a dream plushie, character, or colour combo in mind? Tell me your idea, and let's finalize the design &amp; price together!</p>
           <div className={`success-banner${sent ? ' show' : ''}`}>Thanks! Your custom idea is received — let's connect on WhatsApp! ✦</div>
 
-          <form onSubmit={submit}>
+          <form onSubmit={submit} key={user?.uid || 'guest'}>
             <div className="row-2">
-              <div className="field"><label htmlFor="ocName">Your Name *</label><input id="ocName" name="name" type="text" placeholder="Full name" required /></div>
-              <div className="field"><label htmlFor="ocPhone">Phone / WhatsApp *</label><input id="ocPhone" name="phone" type="tel" placeholder="10-digit mobile number" required maxLength={10} inputMode="numeric" /></div>
+              <div className="field"><label htmlFor="ocName">Your Name *</label><input id="ocName" name="name" type="text" defaultValue={profile?.name} placeholder="Full name" required /></div>
+              <div className="field"><label htmlFor="ocPhone">Phone / WhatsApp *</label><input id="ocPhone" name="phone" type="tel" defaultValue={cleanIndianPhone(profile?.phone)} placeholder="10-digit mobile number" required maxLength={10} inputMode="numeric" /></div>
             </div>
-            <div className="field"><label htmlFor="ocEmail">Email Address</label><input id="ocEmail" name="email" type="email" placeholder="you@email.com" /></div>
+            <div className="field"><label htmlFor="ocEmail">Email Address</label><input id="ocEmail" name="email" type="email" defaultValue={user?.email} placeholder="you@email.com" /></div>
 
             <div className="field">
               <label>Pick a Suggested Colour Palette (optional)</label>
