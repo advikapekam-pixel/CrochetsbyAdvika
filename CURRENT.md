@@ -18,8 +18,8 @@ The React port must match its behavior unless a decision below says otherwise.
 ## 3. Build plan (one step at a time, PM approves each)
 | # | Step | Status |
 |---|------|--------|
-| 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Next |
-| 2 | Catalog data + Home + Gallery + Product pages | — |
+| 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Done (branch feature/app-shell) |
+| 2 | Catalog data + Home + Gallery + Product pages | Next |
 | 3 | Wishlist + Cart (guest localStorage) | — |
 | 4 | Firebase/EmailJS services from .env | — |
 | 5 | Checkout + Custom Order + WhatsApp handoff | — |
@@ -36,7 +36,9 @@ The React port must match its behavior unless a decision below says otherwise.
 | Config location | `.env` (gitignored), `.env.example` committed | Decided |
 | JS package manager | npm (uv is Python-only) | Provisional |
 | Run locally | `start.bat` → http://localhost:5173 | Decided |
-| URL style for pages | — | Open |
+| URL style for pages | Clean paths via react-router (`/gallery`); `firebase.json` rewrites all to index.html | Decided |
+| Styling | Old site CSS reused as-is in `src/index.css` | Decided |
+| Git remote / PRs | No remote yet; work on feature branches locally | Open |
 
 ## 5. Run
 Double-click `start.bat`.
