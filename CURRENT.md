@@ -18,15 +18,15 @@ The React port must match its behavior unless a decision below says otherwise.
 ## 3. Build plan (one step at a time, PM approves each)
 | # | Step | Status |
 |---|------|--------|
-| 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Done (branch feature/app-shell) |
-| 2 | Catalog data + Home + Gallery + Product pages | Next |
-| 3 | Wishlist + Cart (guest localStorage) | — |
+| 1 | App shell: global CSS, header/nav, footer, routing, empty pages | Done |
+| 2 | Catalog data + Home (incl. testimonials, FAQ) + Gallery + Product pages; shared cart/wishlist/toast state | Done (branch feature/catalog-pages) |
+| 3 | Wishlist page + Cart page (coupons, gift note) | Next |
 | 4 | Firebase/EmailJS services from .env | — |
 | 5 | Checkout + Custom Order + WhatsApp handoff | — |
 | 6 | Auth (login/signup/phone verify) + Account | — |
 | 7 | Track Order | — |
 | 8 | Admin dashboard + Excel export | — |
-| 9 | About, Policies, FAQ, testimonials | — |
+| 9 | About, Policies | — |
 | 10 | Security fixes (firestore.rules, XSS, phone-auth bug) | — |
 
 ## 4. Decisions
@@ -39,6 +39,9 @@ The React port must match its behavior unless a decision below says otherwise.
 | URL style for pages | Clean paths via react-router (`/gallery`); `firebase.json` rewrites all to index.html | Decided |
 | Styling | Old site CSS reused as-is in `src/index.css` | Decided |
 | Git remote / PRs | No remote yet; work on feature branches locally | Open |
+| Gallery category filter | In URL (`/gallery?cat=hats`) so collection links work | Decided |
+| Wishlist persistence | In memory only, same as old site | Provisional |
+| Hint/share links | Point to `/product/<id>` (old site linked to `#product`) | Decided |
 
 ## 5. Run
 Double-click `start.bat`.

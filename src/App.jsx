@@ -3,12 +3,12 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import SiteHeader from './components/SiteHeader';
 import SiteFooter from './components/SiteFooter';
 import PageStub from './pages/PageStub';
+import HomePage from './pages/HomePage';
+import GalleryPage from './pages/GalleryPage';
+import ProductPage from './pages/ProductPage';
 
-// ── Every page route; stubs are swapped for real pages step by step ──
-const ROUTES = [
-  { path: '/', title: 'Home' },
-  { path: '/gallery', title: 'Gallery' },
-  { path: '/product/:id', title: 'Product' },
+// ── Pages still to port; each stub is swapped for its real page step by step ──
+const STUB_ROUTES = [
   { path: '/wishlist', title: 'Wishlist' },
   { path: '/cart', title: 'Cart' },
   { path: '/track', title: 'Track Order' },
@@ -34,7 +34,10 @@ export default function App() {
       <SiteHeader />
       <main>
         <Routes>
-          {ROUTES.map(r => <Route key={r.path} path={r.path} element={<PageStub title={r.title} />} />)}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/product/:id" element={<ProductPage />} />
+          {STUB_ROUTES.map(r => <Route key={r.path} path={r.path} element={<PageStub title={r.title} />} />)}
           <Route path="*" element={<PageStub title="Page not found" />} />
         </Routes>
       </main>

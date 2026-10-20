@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useShop } from '../shop/ShopContext';
 
 // ── Main nav links (desktop + mobile drawer) ──
 const NAV_LINKS = [
@@ -17,6 +18,7 @@ const NAV_LINKS = [
  */
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { cartCount, wishlist } = useShop();
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -38,8 +40,8 @@ export default function SiteHeader() {
         <div className="nav-actions">
           <Link className="btn btn-charcoal btn-sm" to="/login">Login</Link>
           <Link className="btn btn-rose btn-sm" to="/custom-order">Custom Order</Link>
-          <Link className="icon-btn" to="/wishlist" aria-label="View wishlist">♡</Link>
-          <Link className="icon-btn" to="/cart" aria-label="View cart">🛍️</Link>
+          <Link className="icon-btn" to="/wishlist" aria-label="View wishlist">♡{wishlist.size > 0 && <span className="badge-count">{wishlist.size}</span>}</Link>
+          <Link className="icon-btn" to="/cart" aria-label="View cart">🛍️{cartCount > 0 && <span className="badge-count">{cartCount}</span>}</Link>
           <button
             className={`menu-toggle${menuOpen ? ' active' : ''}`}
             onClick={() => setMenuOpen(open => !open)}
