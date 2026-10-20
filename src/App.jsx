@@ -1,0 +1,53 @@
+import { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import SiteHeader from './components/SiteHeader';
+import SiteFooter from './components/SiteFooter';
+import PageStub from './pages/PageStub';
+import HomePage from './pages/HomePage';
+import GalleryPage from './pages/GalleryPage';
+import ProductPage from './pages/ProductPage';
+import WishlistPage from './pages/WishlistPage';
+import CartPage from './pages/CartPage';
+import CustomOrderPage from './pages/CustomOrderPage';
+import LoginPage from './pages/LoginPage';
+import TrackOrderPage from './pages/TrackOrderPage';
+import AccountPage from './pages/AccountPage';
+
+// ── Pages still to port; each stub is swapped for its real page step by step ──
+const STUB_ROUTES = [
+  { path: '/admin', title: 'Admin' },
+  { path: '/about', title: 'About' },
+  { path: '/policies/:tab?', title: 'Policies' },
+];
+
+/**
+ * App layout: header, the current page, footer. Scrolls to top on page change.
+ *
+ * >>> <BrowserRouter><App /></BrowserRouter>
+ */
+export default function App() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [pathname]);
+
+  return (
+    <>
+      <SiteHeader />
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/custom-order" element={<CustomOrderPage />} />
+          <Route path="/track" element={<TrackOrderPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          {STUB_ROUTES.map(r => <Route key={r.path} path={r.path} element={<PageStub title={r.title} />} />)}
+          <Route path="*" element={<PageStub title="Page not found" />} />
+        </Routes>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
