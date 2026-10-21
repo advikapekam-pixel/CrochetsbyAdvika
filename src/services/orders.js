@@ -28,8 +28,11 @@ async function writeTrackingSnapshot(orderId, order) {
       items: (order.items || []).map(i => ({ name: i.name || '', qty: i.qty || 1 })),
       total: order.total ?? null,
       idea: order.idea ? order.idea.slice(0, 80) : '',
+      giftMessage: order.giftMessage ? order.giftMessage.slice(0, 100) : '',
     });
-  } catch (err) { console.warn('Tracking snapshot failed (order still placed):', err); }
+  } catch (err) {
+    console.warn('Tracking snapshot failed (order still placed):', err);
+  }
 }
 
 /**
@@ -79,33 +82,68 @@ export async function listAllOrders() {
  */
 export async function updateOrderStatus(orderId, status) {
   await updateDoc(doc(db, 'orders', orderId), { status });
-  try { await updateDoc(doc(db, 'tracking', shortOrderId(orderId)), { status }); }
-  catch (err) { console.warn('Tracking status update failed:', err); }
+  try {
+    await setDoc(doc(db, 'tracking', shortOrderId(orderId)), { status }, { merge: true });
+  } catch (err) {
+    console.warn('Tracking status update failed:', err);
+  }
 }
 
 /**
- * Find an order to track by 7-char order number, or by phone for a logged-in
- * customer. Returns the order (with id) or null. Never lists all orders.
+ * Find an order to track by its 7-char order number (or full order ID),
+ * or by phone / order history for a logged-in customer. Returns the order (with id) or null.
  *
  * >>> await findOrderToTrack('#A1B2C3D')
  * { id: 'a1b2c3d4…', status: 'in progress', name: 'Riya', items: [...], ... }
  */
 export async function findOrderToTrack(input, uid = null) {
-  const orderNumber = (input || '').replace(/#/g, '').trim().toUpperCase();
+  const raw = (input || '').replace(/#/g, '').trim();
+  if (!raw) return null;
 
-  // ── By order number: public tracking snapshot ──
-  if (/^[A-Z0-9]{7}$/.test(orderNumber)) {
+  const upper = raw.toUpperCase();
+  // Extract 7-char short ID (works whether customer entered 7-char ID or full 20-char Firestore ID)
+  const shortId = upper.slice(0, 7);
+
+  // 1. By order number: public tracking snapshot
+  if (/^[A-Z0-9]{7}$/.test(shortId)) {
     try {
-      const snap = await getDoc(doc(db, 'tracking', orderNumber));
-      if (snap.exists()) return { ...snap.data(), id: snap.data().orderId || orderNumber };
-    } catch (err) { console.warn('Tracking lookup failed:', err); }
+      const snap = await getDoc(doc(db, 'tracking', shortId));
+      if (snap.exists()) {
+        return { ...snap.data(), id: snap.data().orderId || shortId };
+      }
+    } catch (err) {
+      console.warn('Tracking lookup by shortId failed:', err);
+    }
   }
 
-  // ── By phone: only within the logged-in customer's own orders ──
-  const phone = cleanIndianPhone(input);
-  if (phone.length === 10 && uid) {
-    const mine = await listCustomerOrders(uid);
-    return mine.find(o => cleanIndianPhone(o.phone) === phone) || null;
+  // 2. If logged in, search within customer's own orders (by short ID, full ID, or phone)
+  if (uid) {
+    try {
+      const mine = await listCustomerOrders(uid);
+      const phoneInput = cleanIndianPhone(raw);
+      const match = mine.find(o =>
+        shortOrderId(o.id) === shortId ||
+        o.id.toUpperCase() === upper ||
+        o.id === raw ||
+        (phoneInput.length === 10 && cleanIndianPhone(o.phone) === phoneInput)
+      );
+      if (match) return match;
+    } catch (err) {
+      console.warn('Customer orders fallback lookup failed:', err);
+    }
   }
+
+  // 3. Fallback: If logged in and given a full order ID, try direct getDoc on orders
+  if (uid && raw.length >= 15) {
+    try {
+      const orderSnap = await getDoc(doc(db, 'orders', raw));
+      if (orderSnap.exists() && orderSnap.data().uid === uid) {
+        return { id: orderSnap.id, ...orderSnap.data() };
+      }
+    } catch {
+      /* ignore permission denial or missing doc */
+    }
+  }
+
   return null;
 }

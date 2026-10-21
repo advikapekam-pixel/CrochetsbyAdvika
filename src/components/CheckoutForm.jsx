@@ -128,7 +128,7 @@ export default function CheckoutForm({ pricing, coupon, giftMessage, onPlaced })
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
               <a className="btn btn-whatsapp btn-block" href={whatsappAdvikaLink(cartOrderMessage(placed.orderNumber, placed.order))} target="_blank" rel="noopener" style={{ fontSize: 15, padding: '15px 0' }}>💬 Chat with Advika to Confirm &amp; Pay</a>
-              <button className="btn btn-outline btn-block" onClick={() => navigate('/track')}>Track Order</button>
+              <button className="btn btn-outline btn-block" onClick={() => navigate('/track', { state: { orderId: placed.orderNumber } })}>Track Order</button>
             </div>
           </div>
         )}

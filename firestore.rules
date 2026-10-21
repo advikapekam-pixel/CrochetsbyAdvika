@@ -2,22 +2,98 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid} (Firebase Auth UID)
+    // Fields:
+    //   - name: string (required) - Customer's display name
+    //   - email: string (required, immutable) - Customer's email
+    //   - role: string (required, immutable) - 'customer' or 'admin'
+    //   - phone: string (optional) - Customer's mobile number
+    //   - phoneVerified: bool (optional) - Verified against auth token
+    //   - createdAt: timestamp (required, immutable) - Account creation timestamp
+    //
+    // Collection: orders
+    // Document ID: {orderId} (Auto-generated Firestore document ID)
+    // Fields:
+    //   - type: string (required, 'cart' | 'custom') - Order type
+    //   - status: string (required, 'new' on create) - Current order status
+    //   - uid: string (optional) - Customer UID if logged in, null for guest
+    //   - name: string (required) - Customer's full name (1-100 chars)
+    //   - phone: string (required) - Customer's Indian mobile (+91[6-9]...)
+    //   - phoneVerified: bool (optional) - Whether phone was verified
+    //   - email: string (optional, <= 120 chars) - Customer email
+    //   - address: string (optional, <= 500 chars) - Delivery address
+    //   - city: string (optional, <= 60 chars) - Delivery city
+    //   - pincode: string (optional, <= 6 chars) - Postal pincode
+    //   - notes: string (optional, <= 300 chars) - Order notes
+    //   - isGift: bool (optional) - Gift order flag
+    //   - giftMessage: string (optional, <= 200 chars) - Handwritten gift note
+    //   - couponApplied: string (optional) - Applied coupon code
+    //   - discountAmount: number (optional) - Discount amount in INR
+    //   - items: list (optional/required for cart, <= 50 items) - Purchased line items
+    //   - subtotal: number (optional/required for cart) - Subtotal in INR
+    //   - shipping: number (optional/required for cart, fixed 60) - Shipping in INR
+    //   - total: number (optional/required for cart) - Grand total in INR
+    //   - paymentStatus: string (optional) - Payment status
+    //   - budget: string (optional, <= 100 chars) - Custom order budget
+    //   - idea: string (optional, <= 2000 chars) - Custom order idea description
+    //   - palette: string (optional, <= 100 chars) - Custom color palette
+    //   - createdAt: timestamp (required) - Order placement timestamp
+    //
+    // Collection: carts
+    // Document ID: {uid} (Customer UID)
+    // Fields:
+    //   - items: map (required) - Cart items map { productId: qty }
+    //   - updatedAt: timestamp (optional) - Last cart update timestamp
+    //
+    // Collection: tracking
+    // Document ID: {shortId} (7-char uppercase alphanumeric ID, e.g. 'A1B2C3D')
+    // Fields:
+    //   - orderId: string (required) - Corresponding Firestore order ID
+    //   - type: string (required, 'cart' | 'custom') - Order type
+    //   - status: string (required, 'new' on create) - Order progress status
+    //   - createdAt: timestamp (required) - Snapshot creation timestamp
+    //   - name: string (required, 1-100 chars) - Customer first name
+    //   - city: string (required, <= 100 chars) - Delivery city (empty string for custom)
+    //   - items: list (required, <= 50 items) - Items list [{ name, qty }] (empty list for custom)
+    //   - total: number | null (optional) - Cart total or null for custom
+    //   - idea: string (optional, <= 200 chars) - Custom idea excerpt or empty string
+    //   - giftMessage: string (optional, <= 200 chars) - Gift note excerpt
+    //
+    // ===============================================================
+
     // ── Helpers ──
-    function signedIn() { return request.auth != null; }
-    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
     function isAdmin() {
       return signedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+        (request.auth.token.get('admin', false) == true ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin'));
     }
+
     function unchanged(field) {
       return request.resource.data.get(field, null) == resource.data.get(field, null);
     }
+
     // phoneVerified may only be true when Firebase Auth itself holds that phone
     // (set by linking it with an SMS/WhatsApp code), so it can't be faked.
     function phoneVerifiedHonest() {
       return request.resource.data.get('phoneVerified', false) == false ||
-        request.resource.data.get('phone', '') == request.auth.token.get('phone_number', '');
+        (signedIn() && request.auth.token.get('phone_number', '') != '' &&
+         request.resource.data.get('phone', '') == request.auth.token.get('phone_number', ''));
     }
+
     function shortText(field, max) {
       return !(field in request.resource.data) || request.resource.data[field] == null ||
         (request.resource.data[field] is string && request.resource.data[field].size() <= max);
@@ -49,6 +125,7 @@ service cloud.firestore {
         && shortText('idea', 2000) && shortText('budget', 100) && shortText('palette', 100)
         && (o.type == 'custom' || validCartTotals(o));
     }
+
     function validCartTotals(o) {
       return o.items is list && o.items.size() > 0 && o.items.size() <= 50
         && o.subtotal is number && o.subtotal > 0
@@ -69,14 +146,27 @@ service cloud.firestore {
     }
 
     // ── Tracking: public lookup by 7-char order number, no personal details ──
-    // Only creatable for a real order whose id starts with that number; never overwritten by the public.
+    // Only creatable for a real order whose id matches; never overwritten by the public.
+    function validTrackingCreate(shortId) {
+      let t = request.resource.data;
+      return shortId.matches('^[A-Z0-9]{7}$')
+        && t.status == 'new'
+        && t.orderId is string && t.orderId.matches('^[a-zA-Z0-9]+$')
+        && exists(/databases/$(database)/documents/orders/$(t.orderId))
+        && t.type in ['cart', 'custom']
+        && t.name is string && t.name.size() > 0 && t.name.size() <= 100
+        && t.city is string && t.city.size() <= 100
+        && t.items is list && t.items.size() <= 50
+        && t.createdAt is timestamp
+        && (!('total' in t) || t.total == null || (t.total is number && t.total >= 0))
+        && shortText('idea', 200)
+        && t.keys().hasOnly(['orderId', 'type', 'status', 'createdAt', 'name', 'city', 'items', 'total', 'idea', 'giftMessage']);
+    }
+
     match /tracking/{shortId} {
       allow get: if true;
       allow list: if false;
-      allow create: if request.resource.data.status == 'new'
-        && request.resource.data.orderId is string
-        && request.resource.data.orderId[0:7].upper() == shortId
-        && exists(/databases/$(database)/documents/orders/$(request.resource.data.orderId));
+      allow create: if validTrackingCreate(shortId);
       allow update, delete: if isAdmin();
     }
   }

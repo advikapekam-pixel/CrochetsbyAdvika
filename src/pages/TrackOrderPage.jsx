@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAccount } from '../account/AccountContext';
 import { useShop } from '../shop/ShopContext';
 import { formatDate, formatPrice } from '../shop/format';
@@ -61,18 +62,39 @@ function TrackingResult({ order }) {
  * >>> <Route path="/track" element={<TrackOrderPage />} />
  */
 export default function TrackOrderPage() {
+  const location = useLocation();
   const { user } = useAccount();
   const { showToast } = useShop();
-  const [input, setInput] = useState('');
+
+  const initialId = location.state?.orderId || new URLSearchParams(location.search).get('id') || '';
+  const [input, setInput] = useState(initialId);
   const [searching, setSearching] = useState(false);
   const [result, setResult] = useState(undefined); // undefined = not searched, null = not found
 
-  const search = async e => {
-    e.preventDefault();
+  const executeSearch = useCallback(async queryStr => {
+    const term = (queryStr || '').trim();
+    if (!term) return;
     setSearching(true);
-    try { setResult(await findOrderToTrack(input, user?.uid)); }
-    catch (err) { console.error(err); showToast('Failed to retrieve tracking information'); }
-    finally { setSearching(false); }
+    try {
+      setResult(await findOrderToTrack(term, user?.uid));
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to retrieve tracking information');
+    } finally {
+      setSearching(false);
+    }
+  }, [user?.uid, showToast]);
+
+  useEffect(() => {
+    if (initialId) {
+      setInput(initialId);
+      executeSearch(initialId);
+    }
+  }, [initialId, executeSearch]);
+
+  const search = e => {
+    e.preventDefault();
+    executeSearch(input);
   };
 
   return (
